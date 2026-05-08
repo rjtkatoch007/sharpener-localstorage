@@ -1,55 +1,58 @@
-function handleFormSubmit(event) {
-  event.preventDefault();
-
-  const userDetails = {
-    username: event.target.username.value,
-    email: event.target.email.value,
-    phone: event.target.phone.value,
-  };
-
-  localStorage.setItem(userDetails.email, JSON.stringify(userDetails));
-  displayUserOnScreen(userDetails);
-  event.target.reset();
+document.addEventListener("DOMContentLoaded", initialize);
+// Don't remove anything just complete the functions
+// When the page get load display all users
+function initialize() {
+    const usersList = JSON.parse(localStorage.getItem("usersList")) || [];
+    for (let i = 0; i < usersList.length; i++) {
+        display(usersList[i]);
+    }
 }
 
-function displayUserOnScreen(userDetails) {
-  // Select the list INSIDE the function to ensure it's found
-  const userList = document.querySelector("ul");
-  
-  if (!userList) {
-    console.error("The <ul> element was not found on the page.");
-    return;
-  }
+// add new users in usersList array
+function handleFormSubmit(event) {  
+    event.preventDefault();
 
-  const listItem = document.createElement("li");
-  listItem.id = userDetails.email;
-  listItem.textContent = `${userDetails.username} - ${userDetails.email} - ${userDetails.phone} `;
+    const userDetails = {
+        username: event.target.username.value,
+        email: event.target.email.value,
+        phone: event.target.phone.value,
+    }
+    const usersList = JSON.parse(localStorage.getItem("userList")) || [];
+    userDetails.id = Date.now();
+    usersList.push(userDetails);
+    display(userDetails);
 
-  const deleteBtn = document.createElement("button");
-  deleteBtn.textContent = "Delete";
-  deleteBtn.className = "delete-btn";
+    localStorage.setItem("usersList", JSON.stringify(usersList));   
+    event.target.reset();
 
-  deleteBtn.onclick = () => {
-    localStorage.removeItem(userDetails.email);
-    userList.removeChild(listItem);
-  };
-
-  listItem.appendChild(deleteBtn);
-  userList.appendChild(listItem);
 }
+ // use this function to display user on screen
+ function display(data) {
+     const ul = document.querySelector("ul");    
+     const li = document.createElement("li");     
+     li.textContent = data.username + " " + data.email + " " + data.phone;
 
-// Ensure the page is ready before loading saved data
-window.addEventListener("DOMContentLoaded", () => {
-    Object.keys(localStorage).forEach((key) => {
-        try {
-            const userDetails = JSON.parse(localStorage.getItem(key));
-            // Basic check to ensure we only load valid user objects
-            if(userDetails && userDetails.email) {
-                displayUserOnScreen(userDetails);
-            }
-        } catch (e) {
-            // Skips items in localStorage that aren't valid JSON
-        }
-    });
-});
- //module.exports = handleFormSubmit;
+     ul.appendChild(li);
+
+     const deleteBtn = document.createElement("button");
+     deleteBtn.textContent = "Delete";
+     deleteBtn.className = "delete-btn";
+
+     deleteBtn.addEventListener('click', () => deleteData(data.id, li));     
+     
+     li.appendChild(deleteBtn);
+ }
+
+ // use this function to delete the user details from local store and DOM (screen)
+function deleteData(id, li) {
+    const usersList = JSON.parse(localStorage.getItem("usersList")) || [];
+    const updateUsersList = [];
+    for (let i = 0; i < usersList.length; i++){
+        if (id!=usersList[i].id) {
+            updateUsersList.push(usersList[i]);
+        }        
+    }    
+     localStorage.setItem("usersList", JSON.stringify(updateUsersList));
+     li.remove();
+ }
+ //module.exports = handleFormSubmit
