@@ -2,27 +2,43 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <link href="https://jsdelivr.net" rel="stylesheet">
 </head>
 
-<body style="margin: 0">
-    <form onsubmit="handleFormSubmit(event)">
-        <label>Username</label>
-        <input type="text" id="username" name="username">
-        <label>Email</label>
-        <input type="email" id="email" name="email">
-        <label>Phone</label>
-        <input type="tel" id="phone" name="phone">
+<body class="bg-light">
+    <div class="container mt-5" style="max-width: 600px;">
+        <div class="card p-4 shadow-sm mb-4">
+            <h2 class="mb-4 text-center">Expense Tracker</h2>
+            <form id="expenseForm">
+                <div class="mb-3">
+                    <label for="amount" class="form-label">Choose expenseamount</label>
+                    <input type="number" class="form-control" id="amount" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Choose description</label>
+                    <input type="text" class="form-control" id="description" required>
+                </div>
+                <div class="mb-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select class="form-select" id="category" required>
+                        <option value="one">one</option>
+                        <option value="two">two</option>
+                        <option value="three">three</option>
+                    </select>
+                </div>
+                <button type="submit" id="submitBtn" class="btn btn-primary w-100">Add Expense</button>
+            </form>
+        </div>
 
-        <button type="submit">Submit</button>
-    </form>
-    <ul></ul>
+        <div>
+            <h3 class="h5 mb-3">Expense List</h3>
+            <ul id="expenseList" class="list-group"></ul>
+        </div>
+    </div>
+    <script src="index.js"></script>
 </body>
-<!-- Do not touch the below line. Write your javascript code in index.js-->
-<!--<script src="index.js"></script>-->
-<script src="edit.js"></script>
 
 </html>

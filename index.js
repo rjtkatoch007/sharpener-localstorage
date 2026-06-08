@@ -1,58 +1,69 @@
-document.addEventListener("DOMContentLoaded", initialize);
-// Don't remove anything just complete the functions
-// When the page get load display all users
-function initialize() {
-    const usersList = JSON.parse(localStorage.getItem("usersList")) || [];
-    for (let i = 0; i < usersList.length; i++) {
-        display(usersList[i]);
-    }
-}
+ const expenseForm = document.getElementById('expenseForm');
+        const amountInput = document.getElementById('amount');
+        const descriptionInput = document.getElementById('description');
+        const categorySelect = document.getElementById('category');
+        const expenseList = document.getElementById('expenseList');
+        const submitBtn = document.getElementById('submitBtn');
 
-// add new users in usersList array
-function handleFormSubmit(event) {  
-    event.preventDefault();
+        let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+        let editIndex = -1;
 
-    const userDetails = {
-        username: event.target.username.value,
-        email: event.target.email.value,
-        phone: event.target.phone.value,
-    }
-    const usersList = JSON.parse(localStorage.getItem("userList")) || [];
-    userDetails.id = Date.now();
-    usersList.push(userDetails);
-    display(userDetails);
+        function renderExpenses() {
+            expenseList.innerHTML = '';
+            expenses.forEach((expense, index) => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center mb-2 shadow-sm rounded bg-white';
+                li.innerHTML = `
+                    <div>
+                        <span class="fw-bold">$${expense.amount}</span> - 
+                        <span>${expense.description}</span> 
+                        <span class="badge bg-secondary ms-2">${expense.category}</span>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-warning me-2" onclick="editExpense(${index})">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteExpense(${index})">Delete</button>
+                    </div>
+                `;
+                expenseList.appendChild(li);
+            });
+        }
 
-    localStorage.setItem("usersList", JSON.stringify(usersList));   
-    event.target.reset();
+        expenseForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const amount = amountInput.value;
+            const description = descriptionInput.value;
+            const category = categorySelect.value;
 
-}
- // use this function to display user on screen
- function display(data) {
-     const ul = document.querySelector("ul");    
-     const li = document.createElement("li");     
-     li.textContent = data.username + " " + data.email + " " + data.phone;
+            const expenseData = { amount, description, category };
 
-     ul.appendChild(li);
+            if (editIndex === -1) {
+                expenses.push(expenseData);
+            } else {
+                expenses[editIndex] = expenseData;
+                editIndex = -1;
+                submitBtn.textContent = 'Add Expense';
+                submitBtn.className = 'btn btn-primary w-100';
+            }
 
-     const deleteBtn = document.createElement("button");
-     deleteBtn.textContent = "Delete";
-     deleteBtn.className = "delete-btn";
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+            renderExpenses();
+            expenseForm.reset();
+        });
 
-     deleteBtn.addEventListener('click', () => deleteData(data.id, li));     
-     
-     li.appendChild(deleteBtn);
- }
+        window.deleteExpense = function(index) {
+            expenses.splice(index, 1);
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+            renderExpenses();
+        };
 
- // use this function to delete the user details from local store and DOM (screen)
-function deleteData(id, li) {
-    const usersList = JSON.parse(localStorage.getItem("usersList")) || [];
-    const updateUsersList = [];
-    for (let i = 0; i < usersList.length; i++){
-        if (id!=usersList[i].id) {
-            updateUsersList.push(usersList[i]);
-        }        
-    }    
-     localStorage.setItem("usersList", JSON.stringify(updateUsersList));
-     li.remove();
- }
- //module.exports = handleFormSubmit
+        window.editExpense = function(index) {
+            const expense = expenses[index];
+            amountInput.value = expense.amount;
+            descriptionInput.value = expense.description;
+            categorySelect.value = expense.category;
+            editIndex = index;
+            submitBtn.textContent = 'Update Expense';
+            submitBtn.className = 'btn btn-success w-100';
+        };
+
+        renderExpenses();
