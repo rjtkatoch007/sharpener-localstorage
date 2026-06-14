@@ -13,6 +13,16 @@ function handleFormSubmit(event) {
     .then((response) => displayUserOnScreen(response.data))
     .catch((error) => console.log(error));
 
+    window.addEventListener("DOMContentLoaded", () => {
+        axios.get("https://crudcrud/api/5519d12fca344fd6b10665aea264519d/userData", userDetails)
+            .then((response) => {
+                for (var i = 0; i < response.data.length; i++){
+                    displayUserOnScreen(response.data[i])
+                }
+            })
+            .catch((error) => console.log(error));
+    });  
+
   // Clearing the input fields
   document.getElementById("username").value = "";
   document.getElementById("email").value = "";
