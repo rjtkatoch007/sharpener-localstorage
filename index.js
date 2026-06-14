@@ -1,69 +1,56 @@
- const expenseForm = document.getElementById('expenseForm');
-        const amountInput = document.getElementById('amount');
-        const descriptionInput = document.getElementById('description');
-        const categorySelect = document.getElementById('category');
-        const expenseList = document.getElementById('expenseList');
-        const submitBtn = document.getElementById('submitBtn');
+function handleFormSubmit(event) {
+  event.preventDefault();
+  const userDetails = {
+    username: event.target.username.value,
+    email: event.target.email.value,
+    phone: event.target.phone.value,
+  };
+  axios
+    .post(
+      "https://crudcrud.com/api/5f5f7fab58364c089d5d351fc582aabc/userData",
+      userDetails
+    )
+    .then((response) => displayUserOnScreen(response.data))
+    .catch((error) => console.log(error));
 
-        let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
-        let editIndex = -1;
+  // Clearing the input fields
+  document.getElementById("username").value = "";
+  document.getElementById("email").value = "";
+  document.getElementById("phone").value = "";
+}
 
-        function renderExpenses() {
-            expenseList.innerHTML = '';
-            expenses.forEach((expense, index) => {
-                const li = document.createElement('li');
-                li.className = 'list-group-item d-flex justify-content-between align-items-center mb-2 shadow-sm rounded bg-white';
-                li.innerHTML = `
-                    <div>
-                        <span class="fw-bold">$${expense.amount}</span> - 
-                        <span>${expense.description}</span> 
-                        <span class="badge bg-secondary ms-2">${expense.category}</span>
-                    </div>
-                    <div>
-                        <button class="btn btn-sm btn-warning me-2" onclick="editExpense(${index})">Edit</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteExpense(${index})">Delete</button>
-                    </div>
-                `;
-                expenseList.appendChild(li);
-            });
-        }
+function displayUserOnScreen(userDetails) {
+  const userItem = document.createElement("li");
+  userItem.appendChild(
+    document.createTextNode(
+      `${userDetails.username} - ${userDetails.email} - ${userDetails.phone}`
+    )
+  );
 
-        expenseForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const amount = amountInput.value;
-            const description = descriptionInput.value;
-            const category = categorySelect.value;
+  const deleteBtn = document.createElement("button");
+  deleteBtn.appendChild(document.createTextNode("Delete"));
+  userItem.appendChild(deleteBtn);
 
-            const expenseData = { amount, description, category };
+  const editBtn = document.createElement("button");
+  editBtn.appendChild(document.createTextNode("Edit"));
+  userItem.appendChild(editBtn);
 
-            if (editIndex === -1) {
-                expenses.push(expenseData);
-            } else {
-                expenses[editIndex] = expenseData;
-                editIndex = -1;
-                submitBtn.textContent = 'Add Expense';
-                submitBtn.className = 'btn btn-primary w-100';
-            }
+  const userList = document.querySelector("ul");
+  userList.appendChild(userItem);
 
-            localStorage.setItem('expenses', JSON.stringify(expenses));
-            renderExpenses();
-            expenseForm.reset();
-        });
+  deleteBtn.addEventListener("click", function (event) {
+    userList.removeChild(event.target.parentElement);
+    localStorage.removeItem(userDetails.email);
+  });
 
-        window.deleteExpense = function(index) {
-            expenses.splice(index, 1);
-            localStorage.setItem('expenses', JSON.stringify(expenses));
-            renderExpenses();
-        };
+  editBtn.addEventListener("click", function (event) {
+    userList.removeChild(event.target.parentElement);
+    localStorage.removeItem(userDetails.email);
+    document.getElementById("username").value = userDetails.username;
+    document.getElementById("email").value = userDetails.email;
+    document.getElementById("phone").value = userDetails.phone;
+  });
+}
 
-        window.editExpense = function(index) {
-            const expense = expenses[index];
-            amountInput.value = expense.amount;
-            descriptionInput.value = expense.description;
-            categorySelect.value = expense.category;
-            editIndex = index;
-            submitBtn.textContent = 'Update Expense';
-            submitBtn.className = 'btn btn-success w-100';
-        };
-
-        renderExpenses();
+// Do not touch code below
+module.exports = handleFormSubmit;
