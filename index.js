@@ -1,66 +1,110 @@
-function handleFormSubmit(event) {
-  event.preventDefault();
-  const userDetails = {
-    username: event.target.username.value,
-    email: event.target.email.value,
-    phone: event.target.phone.value,
-  };
-  axios
-    .post(
-      "https://crudcrud.com/api/5f5f7fab58364c089d5d351fc582aabc/userData",
-      userDetails
-    )
-    .then((response) => displayUserOnScreen(response.data))
-    .catch((error) => console.log(error));
+ // Replace this with your unique endpoint from crudcrud.com (expires every 24 hours)
+    const API_URL = "https://crudcrud.com/api/da786c8a9ced405988f9e515d1bebd3f/booking"; 
+    
+    let allBookings = [];
 
-    window.addEventListener("DOMContentLoaded", () => {
-        axios.get("https://crudcrud/api/5519d12fca344fd6b10665aea264519d/userData", userDetails)
-            .then((response) => {
-                for (var i = 0; i < response.data.length; i++){
-                    displayUserOnScreen(response.data[i])
-                }
-            })
-            .catch((error) => console.log(error));
-    });  
+    // Fetch and display data on page load
+    window.addEventListener("DOMContentLoaded", fetchBookings);
 
-  // Clearing the input fields
-  document.getElementById("username").value = "";
-  document.getElementById("email").value = "";
-  document.getElementById("phone").value = "";
-}
+    async function fetchBookings() {
+        try {
+            const response = await fetch(API_URL);
+            allBookings = await response.json();
+            renderBookings(allBookings);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    }
 
-function displayUserOnScreen(userDetails) {
-  const userItem = document.createElement("li");
-  userItem.appendChild(
-    document.createTextNode(
-      `${userDetails.username} - ${userDetails.email} - ${userDetails.phone}`
-    )
-  );
+    function renderBookings(bookings) {
+        const listContainer = document.getElementById("bookingsList");
+        listContainer.innerHTML = "";
 
-  const deleteBtn = document.createElement("button");
-  deleteBtn.appendChild(document.createTextNode("Delete"));
-  userItem.appendChild(deleteBtn);
+        if (bookings.length === 0) {
+            listContainer.innerHTML = "<p>No bookings found.</p>";
+            return;
+        }
 
-  const editBtn = document.createElement("button");
-  editBtn.appendChild(document.createTextNode("Edit"));
-  userItem.appendChild(editBtn);
+        bookings.forEach(booking => {
+            const item = document.createElement("div");
+            item.className = "booking-item";
+            item.innerHTML = `
+                <div>
+                    <strong>${booking.name}</strong> (${booking.busNumber})<br>
+                    <small>${booking.email} | ${booking.phone}</small>
+                </div>
+                <div class="actions">
+                    <button class="edit-btn" onclick="editBooking('${booking._id}', '${booking.name}', '${booking.email}', '${booking.phone}', '${booking.busNumber}')">Edit</button>
+                    <button class="delete-btn" onclick="deleteBooking('${booking._id}')">Delete</button>
+                </div>
+            `;
+            listContainer.appendChild(item);
+        });
+    }
 
-  const userList = document.querySelector("ul");
-  userList.appendChild(userItem);
+    async function handleFormSubmit(event) {
+        event.preventDefault();
 
-  deleteBtn.addEventListener("click", function (event) {
-    userList.removeChild(event.target.parentElement);
-    localStorage.removeItem(userDetails.email);
-  });
+        const id = document.getElementById("bookingId").value;
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const phone = document.getElementById("phone").value;
+        const busNumber = document.getElementById("busNumber").value;
 
-  editBtn.addEventListener("click", function (event) {
-    userList.removeChild(event.target.parentElement);
-    localStorage.removeItem(userDetails.email);
-    document.getElementById("username").value = userDetails.username;
-    document.getElementById("email").value = userDetails.email;
-    document.getElementById("phone").value = userDetails.phone;
-  });
-}
+        const bookingData = { name, email, phone, busNumber };
 
-// Do not touch code below
-module.exports = handleFormSubmit;
+        try {
+            if (id) {
+                // Update existing record (PUT request)
+                // CrudCrud does not accept _id in the body for PUT requests
+                await fetch(`${API_URL}/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(bookingData)
+                });
+                document.getElementById("submitBtn").innerText = "Book";
+            } else {
+                // Create new record (POST request)
+                await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(bookingData)
+                });
+            }
+            
+            document.getElementById("bookingForm").reset();
+            document.getElementById("bookingId").value = "";
+            fetchBookings(); // Refresh UI
+        } catch (error) {
+            console.error("Error saving data:", error);
+        }
+    }
+
+    async function deleteBooking(id) {
+        try {
+            await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+            fetchBookings(); // Refresh UI
+        } catch (error) {
+            console.error("Error deleting data:", error);
+        }
+    }
+
+    function editBooking(id, name, email, phone, busNumber) {
+        document.getElementById("bookingId").value = id;
+        document.getElementById("name").value = name;
+        document.getElementById("email").value = email;
+        document.getElementById("phone").value = phone;
+        document.getElementById("busNumber").value = busNumber;
+        
+        document.getElementById("submitBtn").innerText = "Update Booking";
+    }
+
+    function filterBookings() {
+        const filterValue = document.getElementById("filterBus").value;
+        if (filterValue === "all") {
+            renderBookings(allBookings);
+        } else {
+            const filtered = allBookings.filter(b => b.busNumber === filterValue);
+            renderBookings(filtered);
+        }
+    }

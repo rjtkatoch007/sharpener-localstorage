@@ -2,25 +2,58 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Booking App</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
-<body style="margin: 0">
-    <form onsubmit="handleFormSubmit(event)">
-        <label for="username">Username</label>
-        <input type="text" name="username" id="username" />
-        <label for="email">Email</label>
-        <input type="email" name="email" id="email" />
-        <label for="phone">Phone No</label>
-        <input type="tel" name="phone" id="phone" />
-        <button type="submit">Submit</button>
-    </form>
-    <ul></ul>
+<body>
+
+    <div class="container">
+        <!-- Filter Dropdown -->
+        <div class="filter-section">
+            <label for="filterBus">Filter by Bus:</label>
+            <select id="filterBus" onchange="filterBookings()">
+                <option value="all">All</option>
+                <option value="Bus1">Bus1</option>
+                <option value="Bus2">Bus2</option>
+                <option value="Bus3">Bus3</option>
+            </select>
+        </div>
+
+        <!-- Booking Form -->
+        <form id="bookingForm" onsubmit="handleFormSubmit(event)">
+            <input type="hidden" id="bookingId">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone:</label>
+                <input type="tel" id="phone" required>
+            </div>
+            <div class="form-group">
+                <label for="busNumber">Bus Number:</label>
+                <select id="busNumber" required>
+                    <option value="Bus1">Bus1</option>
+                    <option value="Bus2">Bus2</option>
+                    <option value="Bus3">Bus3</option>
+                </select>
+            </div>
+            <button type="submit" id="submitBtn">Book</button>
+        </form>
+
+        <!-- Display Bookings -->
+        <h3>Latest Bookings</h3>
+        <div id="bookingsList"></div>
+    </div>
+
+    <script src="index.js"></script>
 </body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
-<script src="index.js"></script>
 
 </html>
